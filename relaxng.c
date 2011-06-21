@@ -5369,7 +5369,7 @@ xmlRelaxNGParseNameClass(xmlRelaxNGParserCtxtPtr ctxt, xmlNodePtr node,
     } else {
         xmlRngPErr(ctxt, node, XML_RNGP_CHOICE_CONTENT,
                    "expecting name, anyName, nsName or choice : got %s\n",
-                   (node == NULL ? "nothing" : node->name), NULL);
+                   (node == NULL ? "nothing" : (const char *)node->name), NULL);
         return (NULL);
     }
     if (ret != def) {
