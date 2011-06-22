@@ -2518,17 +2518,7 @@ __xmlParserInputBufferCreateFilename(const char *URI, xmlCharEncoding enc) {
 #ifdef HAVE_ZLIB_H
 	if ((xmlInputCallbackTable[i].opencallback == xmlGzfileOpen) &&
 		(strcmp(URI, "-") != 0)) {
-	    if (((z_stream *)context)->avail_in > 4) {
-	        char *cptr, buff4[4];
-		cptr = (char *) ((z_stream *)context)->next_in;
-		if (gzread(context, buff4, 4) == 4) {
-		    if (strncmp(buff4, cptr, 4) == 0)
-		        ret->compressed = 0;
-		    else
-		        ret->compressed = 1;
-		    gzrewind(context);
-		}
-	    }
+	    ret->compressed = !gzdirect(context);
 	}
 #endif
     }
