@@ -28,11 +28,13 @@
  */
 #include <win32config.h>
 #include <libxml/xmlversion.h>
-#elif defined (_WINDOWS)
-#include <win32config.h>
-#include <libxml/xmlversion.h>
 #else
-#include "xml2_config.h"
+/*
+ * Currently supported platforms use either autoconf or
+ * copy to config.h own "preset" configuration file.
+ * As result ifdef HAVE_CONFIG_H is omited here.
+ */
+#include "config.h"
 #include <libxml/xmlversion.h>
 #endif
 
@@ -82,6 +84,17 @@ void __xmlGlobalInitMutexLock(void);
 void __xmlGlobalInitMutexUnlock(void);
 void __xmlGlobalInitMutexDestroy(void);
 
+int __xmlInitializeDict(void);
+
+#if defined(HAVE_RAND) && defined(HAVE_SRAND) && defined(HAVE_TIME)
+/*
+ * internal thread safe random function
+ */
+int __xmlRandom(void);
+#endif
+
+int xmlNop(void);
+
 #ifdef IN_LIBXML
 #ifdef __GNUC__
 #ifdef PIC
@@ -92,5 +105,8 @@ void __xmlGlobalInitMutexDestroy(void);
 #endif
 #endif
 #endif
+#endif
+#if !defined(PIC) && !defined(NOLIBTOOL)
+#  define LIBXML_STATIC
 #endif
 #endif /* ! __XML_LIBXML_H__ */
