@@ -537,6 +537,16 @@ install(EXPORT libxml2-config DESTINATION ${PACKAGE_CONFIG_DIR})
 include(CMakePackageConfigHelpers)
 WRITE_BASIC_PACKAGE_VERSION_FILE(${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-version.cmake
     COMPATIBILITY AnyNewerVersion)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-version.cmake DESTINATION ${PACKAGE_CONFIG_DIR})
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake 
+    "include(CMakeFindDependencyMacro)\r\n"
+    "set(_OLD_IMPORT_PREFIX \${_IMPORT_PREFIX})\r\n")
+if (WITH_ZLIB)
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "find_dependency(ZLIB ${ZLIB_VERSION})\r\n")
+endif()
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "set(_IMPORT_PREFIX \${_OLD_IMPORT_PREFIX})")
+install(FILES 
+    ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-version.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake
+    DESTINATION ${PACKAGE_CONFIG_DIR})
 
 
