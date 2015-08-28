@@ -513,13 +513,17 @@ ADD_LIBRARY( ${LIBRARY_TARGET_NAME} ${XML2_SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} 
 target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC LIBXML_XPATH_ENABLED)
 if (WIN32)
     target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC _WINDOWS)
+    # Fix for nanoftp/nanohttp
+    if (MINGW)
+        target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC ws2_32)
+    endif()
 endif()
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC LIBXML_STATIC)
 endif()
 
 IF( ZLIB_FOUND )
-	TARGET_LINK_LIBRARIES( ${LIBRARY_TARGET_NAME} zlib)
+	TARGET_LINK_LIBRARIES( ${LIBRARY_TARGET_NAME} PUBLIC zlib)
 	target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE HAVE_ZLIB_H)
 ENDIF()
 
