@@ -516,11 +516,11 @@ if (WIN32)
     target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC _WINDOWS)
 endif()
 if(HAVE_DLOPEN)
-    target_link_libraries(${LIBRARY_TARGET_NAME} ${DL_LIBRARY})
+    target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC ${DL_LIBRARY})
 endif()
 
 IF( ZLIB_FOUND )
-	target_link_libraries( ${LIBRARY_TARGET_NAME} zlib)
+	target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC zlib)
 	target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE HAVE_ZLIB_H)
 ENDIF()
 
