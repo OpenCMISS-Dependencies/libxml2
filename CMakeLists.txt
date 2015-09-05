@@ -35,76 +35,27 @@
  #
  # ***** END LICENSE BLOCK ***** */
 
-CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
-
-PROJECT( libxml2 LANGUAGES C CXX VERSION 2.7.6)
+cmake_minimum_required(VERSION 3.0)
+project(libxml2 LANGUAGES C CXX VERSION 2.7.6)
 
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
 option(PACKAGE_CONFIG_DIR "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)" "lib/cmake")
-option(WITH_ZLIB "Build in zlib support" TRUE )
+option(WITH_ZLIB "Build in zlib support" ON)
 
 if (WITH_ZLIB)
     find_package(ZLIB ${ZLIB_VERSION} REQUIRED)
 endif()
 
-SET( LIBRARY_TARGET_NAME xml2 )
-STRING( TOUPPER ${LIBRARY_TARGET_NAME} UPPERCASE_LIBRARY_TARGET_NAME )
-SET( XML2_MAJOR_VERSION "2" )
-SET( XML2_MINOR_VERSION "7" )
-SET( XML2_PATCH_VERSION "6" )
+if(NOT BUILD_SHARED_LIBS)
+	set(LIBRARY_INSTALL_TYPE ARCHIVE )
+ELSE()
+	set(LIBRARY_INSTALL_TYPE LIBRARY )
+	if(WIN32 )
+		set(LIBRARY_INSTALL_TYPE RUNTIME )
+	endif(WIN32 )
+endif()
 
-MACRO( OPTION_WITH_DEFAULT OPTION_NAME OPTION_STRING OPTION_DEFAULT )
-	IF( NOT DEFINED ${OPTION_NAME} )
-		SET( ${OPTION_NAME} ${OPTION_DEFAULT} )
-	ENDIF( NOT DEFINED ${OPTION_NAME} )
-
-	OPTION( ${OPTION_NAME} "${OPTION_STRING}" ${${OPTION_NAME}} )
-ENDMACRO( OPTION_WITH_DEFAULT OPTION_NAME OPTION_STRING OPTION_DEFAULT )
-
-MACRO( CACHE_VAR_WITH_DEFAULT OPTION_NAME OPTION_DEFAULT OPTION_TYPE OPTION_STRING )
-	IF( NOT DEFINED ${OPTION_NAME} )
-		SET( ${OPTION_NAME} ${OPTION_DEFAULT} )
-	ENDIF( NOT DEFINED ${OPTION_NAME} )
-
-	SET( ${OPTION_NAME} "${OPTION_DEFAULT}" CACHE ${OPTION_TYPE} "${OPTION_STRING}" )
-ENDMACRO( CACHE_VAR_WITH_DEFAULT OPTION_NAME OPTION_DEFAULT OPTION_TYPE OPTION_STRING )
-
-# Set up library options
-# Generic library options
-CACHE_VAR_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_TYPE "Release" STRING 
-	"Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel" )
-SET( CMAKE_BUILD_TYPE ${${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_TYPE} CACHE
-	INTERNAL "Internalise this variable and manipulate with
-	${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_TYPE" FORCE )
-CACHE_VAR_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_PREFIX
-	"${CMAKE_INSTALL_PREFIX}" PATH 
-	"Install path prefix, prepended onto install directories." )
-SET( CMAKE_INSTALL_PREFIX ${${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_PREFIX}
-	CACHE INTERNAL "Internalise this variable and manipulate with
-	${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_PREFIX" FORCE )
-OPTION_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB "Build static zlib" TRUE )
-OPTION_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_CONFIG "Install a config file for the library" FALSE )
-
-
-IF( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
-	SET( LIBRARY_BUILD_TYPE STATIC )
-	SET( LIBRARY_INSTALL_TYPE ARCHIVE )
-ELSE( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
-	SET( LIBRARY_BUILD_TYPE SHARED )
-	SET( LIBRARY_INSTALL_TYPE LIBRARY )
-	IF( WIN32 )
-		SET( LIBRARY_INSTALL_TYPE RUNTIME )
-	ENDIF( WIN32 )
-ENDIF()
-
-IF( MSVC )
-	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS -DWINVER=0x0600 )
-	IF( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
-		ADD_DEFINITIONS( -DLIBXML_STATIC )
-	ENDIF()
-ENDIF()
-
-SET( XML2_SRCS
+set(XML2_SRCS
 	c14n.c
 	catalog.c
 	chvalid.c
@@ -149,7 +100,7 @@ SET( XML2_SRCS
 	xpath.c
 	xpointer.c )
 
-SET( PRIVATE_HDRS
+set(PRIVATE_HDRS
 	acconfig.h
 	elfgcchack.h
 	libxml.h
@@ -159,7 +110,7 @@ SET( PRIVATE_HDRS
 	triop.h
 	triostr.h )
 
-SET( PUBLIC_HDRS
+set(PUBLIC_HDRS
 	include/libxml/c14n.h
 	include/libxml/catalog.h
 	include/libxml/chvalid.h
@@ -206,329 +157,205 @@ SET( PUBLIC_HDRS
 	include/libxml/xpath.h
 	include/libxml/xpathInternals.h
 	include/libxml/xpointer.h )
-SET( PUBLIC_HDRS ${PUBLIC_HDRS} ${CMAKE_CURRENT_BINARY_DIR}/include/libxml/xmlversion.h )
+set(PUBLIC_HDRS ${PUBLIC_HDRS} ${CMAKE_CURRENT_BINARY_DIR}/include/libxml/xmlversion.h )
 
-IF( MACOSX )
-	SET( PRIVATE_HDRS ${PRIVATE_HDRS}
+if(MACOSX )
+	list(APPEND PRIVATE_HDRS
 		macos/src/config-mac.h
 		macos/src/xmltestprefix.h
 		macos/src/xmltestprefix2.h )
-ENDIF()
+endif()
 
-IF( WIN32 )
-	SET( PRIVATE_HDRS ${PRIVATE_HDRS}
+if(WIN32)
+	list(APPEND PRIVATE_HDRS
 		include/win32config.h
-		include/wsockcompat.h )
-ENDIF()
+		include/wsockcompat.h)
+endif()
 
 # Best to use 'Header Files' and 'Source Files' because any ungrouped files will be placed there by default
-SOURCE_GROUP( "Header Files\\libxml" FILES ${PUBLIC_HDRS} ) 
-SOURCE_GROUP( "Header Files\\" FILES ${PRIVATE_HDRS} ) 
-SOURCE_GROUP( "Source Files\\" FILES ${XML2_SRCS} ) 
+source_group( "Header Files\\libxml" FILES ${PUBLIC_HDRS} ) 
+source_group( "Header Files\\" FILES ${PRIVATE_HDRS} ) 
+source_group( "Source Files\\" FILES ${XML2_SRCS} ) 
 
-SET( VERSION ${XML2_MAJOR_VERSION}.${XML2_MINOR_VERSION}.${XML2_PATCH_VERSION} )
-SET( LIBXML_VERSION_NUMBER ${XML2_MAJOR_VERSION}0${XML2_MINOR_VERSION}0${XML2_PATCH_VERSION} )
-SET( LIBXML_VERSION_EXTRA
-	-GITv${XML2_MAJOR_VERSION}.${XML2_MINOR_VERSION}.${XML2_PATCH_VERSION} )
+set(HAVE_PTHREAD_H ${CMAKE_HAVE_PTHREAD_H} )
+set(HAVE_UNISTD_H ${CMAKE_HAVE_UNISTD_H} )
+set(HAVE_LIMITS_H ${CMAKE_HAVE_LIMITS_H} )
+set(HAVE_SYS_TYPES_H ${CMAKE_HAVE_SYS_PRCTL_H} )
+set(ICONV_CONST const )
 
-SET(PACKAGE "libxml2")
-SET(PACKAGE_STRING "")
-SET(PACKAGE_NAME "")
-SET(PACKAGE_TARNAME "")
-SET(PACKAGE_VERSION "")
-SET(PACKAGE_BUGREPORT "")
-SET(PROTOTYPES 1)
+include(CheckIncludeFile)
+set(CHECK_INC_FILES alloca ansidecl arpa/inet arpa/nameser
+ctype dirent dl dlfcn errno fcntl float fp_class ieeefp
+inttypes inttypes malloc math memory nan ndir netdb netinet/in
+poll resolv signal stdarg stdint stdlib string strings
+sys/dir sys/mman sys/ndir sys/select sys/socket sys/stat
+sys/time sys/timeb time zlib)
+foreach(incfile ${CHECK_INC_FILES})
+    string(REPLACE "/" "_" VARPART ${incfile})
+    string(TOUPPER ${VARPART} VARPART)
+    set(VARNAME HAVE_${VARPART}_H)
+    CHECK_INCLUDE_FILE(${incfile}.h ${VARNAME})
+endforeach()
+include(CheckIncludeFiles)
+CHECK_INCLUDE_FILES("stdint.h;stddef.h;inttypes.h;stdlib.h;strings.h;string.h;float.h" StandardHeadersExist)
 
+include(CheckFunctionExists)
+set(CHECK_FUNCTIONS finite fpclass fprintf fp_class
+    ftime gettimeofday isnand localtime printf signal
+    snprintf sprintf sscanf stat strdup strerror
+    strftime strndup vfprintf vsnprintf vsprintf 
+    _stat getaddrinfo)
+foreach(funcname ${CHECK_FUNCTIONS})
+    string(TOUPPER ${funcname} FUNCNAME_UPPER)
+    CHECK_FUNCTION_EXISTS(${funcname} HAVE_${FUNCNAME_UPPER} )    
+endforeach()
 
-IF( M_LIBRARY )
-  SET( HAVE_LIBM TRUE )
-ENDIF( M_LIBRARY )
-
-SET( HAVE_PTHREAD_H ${CMAKE_HAVE_PTHREAD_H} )
-SET( HAVE_UNISTD_H ${CMAKE_HAVE_UNISTD_H} )
-SET( HAVE_LIMITS_H ${CMAKE_HAVE_LIMITS_H} )
-SET( HAVE_SYS_TYPES_H ${CMAKE_HAVE_SYS_PRCTL_H} )
-SET( ICONV_CONST const )
-
-INCLUDE( CheckIncludeFile )
-CHECK_INCLUDE_FILE( alloca.h HAVE_ALLOCA_H )
-CHECK_INCLUDE_FILE( ansidecl.h HAVE_ANSIDECL_H )
-CHECK_INCLUDE_FILE( arpa/inet.h HAVE_ARPA_INET_H )
-CHECK_INCLUDE_FILE( arpa/nameser.h HAVE_ARPA_NAMESER_H )
-CHECK_INCLUDE_FILE( ctype.h HAVE_CTYPE_H )
-CHECK_INCLUDE_FILE( dirent.h HAVE_DIRENT_H )
-CHECK_INCLUDE_FILE( dl.h HAVE_DL_H )
-CHECK_INCLUDE_FILE( dlfcn.h HAVE_DLFCN_H )
-CHECK_INCLUDE_FILE( errno.h HAVE_ERRNO_H )
-CHECK_INCLUDE_FILE( fcntl.h HAVE_FCNTL_H )
-CHECK_INCLUDE_FILE( float.h HAVE_FLOAT_H )
-CHECK_INCLUDE_FILE( fp_class.h HAVE_FP_CLASS_H )
-CHECK_INCLUDE_FILE( ieeefp.h HAVE_IEEEFP_H )
-CHECK_INCLUDE_FILE( inttypes.h HAVE_INTTYPES_H )
-CHECK_INCLUDE_FILE( inttypes.h.h HAVE_INTTYPES_H_H )
-CHECK_INCLUDE_FILE( malloc.h HAVE_MALLOC_H )
-CHECK_INCLUDE_FILE( math.h HAVE_MATH_H )
-CHECK_INCLUDE_FILE( memory.h HAVE_MEMORY_H )
-CHECK_INCLUDE_FILE( nan.h HAVE_NAN_H )
-CHECK_INCLUDE_FILE( ndir.h HAVE_NDIR_H )
-CHECK_INCLUDE_FILE( netdb.h HAVE_NETDB_H )
-CHECK_INCLUDE_FILE( netinet/in.h HAVE_NETINET_IN_H )
-CHECK_INCLUDE_FILE( poll.h HAVE_POLL_H )
-CHECK_INCLUDE_FILE( resolv.h HAVE_RESOLV_H )
-CHECK_INCLUDE_FILE( signal.h HAVE_SIGNAL_H )
-CHECK_INCLUDE_FILE( stdarg.h HAVE_STDARG_H )
-CHECK_INCLUDE_FILE( stdint.h HAVE_STDINT_H )
-CHECK_INCLUDE_FILE( stdlib.h HAVE_STDLIB_H )
-CHECK_INCLUDE_FILE( string.h HAVE_STRING_H )
-CHECK_INCLUDE_FILE( strings.h HAVE_STRINGS_H )
-CHECK_INCLUDE_FILE( sys/dir.h HAVE_SYS_DIR_H )
-CHECK_INCLUDE_FILE( sys/mman.h HAVE_SYS_MMAN_H )
-CHECK_INCLUDE_FILE( sys/ndir.h HAVE_SYS_NDIR_H )
-CHECK_INCLUDE_FILE( sys/select.h HAVE_SYS_SELECT_H )
-CHECK_INCLUDE_FILE( sys/socket.h HAVE_SYS_SOCKET_H )
-CHECK_INCLUDE_FILE( sys/stat.h HAVE_SYS_STAT_H )
-CHECK_INCLUDE_FILE( sys/time.h HAVE_SYS_TIME_H )
-CHECK_INCLUDE_FILE( sys/timeb.h HAVE_SYS_TIMEB_H )
-CHECK_INCLUDE_FILE( time.h HAVE_TIME_H )
-CHECK_INCLUDE_FILE( zlib.h HAVE_ZLIB_H )
-INCLUDE(CheckFunctionExists)
-CHECK_FUNCTION_EXISTS( class HAVE_CLASS )
-CHECK_FUNCTION_EXISTS( finite HAVE_FINITE )
-CHECK_FUNCTION_EXISTS( fpclass HAVE_FPCLASS )
-CHECK_FUNCTION_EXISTS( fprintf HAVE_FPRINTF )
-CHECK_FUNCTION_EXISTS( fp_class HAVE_FP_CLASS )
-CHECK_FUNCTION_EXISTS( ftime HAVE_FTIME )
-CHECK_FUNCTION_EXISTS( gettimeofday HAVE_GETTIMEOFDAY )
-CHECK_FUNCTION_EXISTS( isnand HAVE_ISNAND )
-CHECK_FUNCTION_EXISTS( localtime HAVE_LOCALTIME )
-CHECK_FUNCTION_EXISTS( printf HAVE_PRINTF )
-CHECK_FUNCTION_EXISTS( signal HAVE_SIGNAL )
-CHECK_FUNCTION_EXISTS( snprintf HAVE_SNPRINTF )
-CHECK_FUNCTION_EXISTS( sprintf HAVE_SPRINTF )
-CHECK_FUNCTION_EXISTS( sscanf HAVE_SSCANF )
-CHECK_FUNCTION_EXISTS( stat HAVE_STAT )
-CHECK_FUNCTION_EXISTS( strdup HAVE_STRDUP )
-CHECK_FUNCTION_EXISTS( strerror HAVE_STRERROR )
-CHECK_FUNCTION_EXISTS( strftime HAVE_STRFTIME )
-CHECK_FUNCTION_EXISTS( strndup HAVE_STRNDUP )
-CHECK_FUNCTION_EXISTS( vfprintf HAVE_VFPRINTF )
-CHECK_FUNCTION_EXISTS( vsnprintf HAVE_VSNPRINTF )
-CHECK_FUNCTION_EXISTS( vsprintf HAVE_VSPRINTF )
-CHECK_FUNCTION_EXISTS( _stat HAVE__STAT )
-CHECK_FUNCTION_EXISTS( getaddrinfo HAVE_GETADDRINFO )
-INCLUDE( CheckIncludeFiles )
-CHECK_INCLUDE_FILES( "dlfcn.h;stdint.h;stddef.h;inttypes.h;stdlib.h;strings.h;string.h;float.h" StandardHeadersExist )
-INCLUDE( CheckSymbolExists )
-IF( StandardHeadersExist )
+include(CheckSymbolExists)
+if(StandardHeadersExist)
 	CHECK_SYMBOL_EXISTS( memchr string.h memchrExists )
-	IF( memchrExists )
-		CHECK_SYMBOL_EXISTS( free stdlib.h STDC_HEADERS )
-	ENDIF( memchrExists )
-ENDIF( StandardHeadersExist )
-CHECK_SYMBOL_EXISTS( DIR "sys/dir.h" HAVE_SYS_DIR_H ) 
-CHECK_SYMBOL_EXISTS( isinf math.h HAVE_ISINF )
-CHECK_SYMBOL_EXISTS( isnan math.h HAVE_ISNAN )
-INCLUDE (CheckLibraryExists)
-SET(INET_LIBRARIES "bsd socket inet")
-IF(NOT HAVE_GETADDRINFO)
-  CHECK_LIBRARY_EXISTS(${INET_LIBRARIES} "getaddrinfo" "" HAVE_GETADDRINFO)
-ENDIF(NOT HAVE_GETADDRINFO)
-INCLUDE(CheckCSourceCompiles)
-IF(HAVE_DLFCN_H)
-	find_library(DL_LIBRARY dl)
-	SET(CMAKE_REQUIRED_LIBRARIES ${DL_LIBRARY})
-	CHECK_C_SOURCE_COMPILES(
-		"
-		#include <dlfcn.h>
-	
-		int main(int argc, char* argv[])
-		{
-			dlopen(0, 0);
-			return 0;
-		}
-		"
-		HAVE_DLOPEN )
-ENDIF()
+	if(memchrExists)
+		CHECK_SYMBOL_EXISTS(free stdlib.h STDC_HEADERS)
+	endif()
+endif()
+CHECK_SYMBOL_EXISTS(DIR "sys/dir.h" HAVE_SYS_DIR_H) 
+CHECK_SYMBOL_EXISTS(isinf math.h HAVE_ISINF)
+CHECK_SYMBOL_EXISTS(isnan math.h HAVE_ISNAN)
+CHECK_SYMBOL_EXISTS(va_copy stdarg.h HAVE_VA_COPY)
+if (HAVE_SYS_SOCKET_H)
+    CHECK_SYMBOL_EXISTS(AF_INET6 "sys/types.h;sys/socket.h" SUPPORT_IP6)
+endif()
 
-CHECK_C_SOURCE_COMPILES(
-	"
-	#include <stdarg.h>
-	va_list ap1, ap2;
+include(CheckLibraryExists)
+CHECK_LIBRARY_EXISTS(m exp "" HAVE_LIBM)
+if(HAVE_DLFCN_H)
+    CHECK_LIBRARY_EXISTS(dl dlopen "" HAVE_DLOPEN)
+endif()
+set(INET_LIBRARIES bsd socket inet)
+if(NOT HAVE_GETADDRINFO)
+    foreach(INET_LIB ${INET_LIBRARIES})
+        CHECK_LIBRARY_EXISTS(${INET_LIB} "getaddrinfo" "" HAVE_INET_LIB_${INET_LIB})
+        if (HAVE_INET_LIB_${INET_LIB})
+            set(HAVE_GETADDRINFO YES)
+        endif()
+    endforeach()
+endif()
+if (HAVE_SYS_SOCKET_H)
+    include(CheckStructHasMember)
+    CHECK_STRUCT_HAS_MEMBER(sockaddr_storage ss_family "sys/types.h;sys/socket.h" HAVE_SS_FAMILY)
+    if(NOT HAVE_SS_FAMILY)
+        CHECK_STRUCT_HAS_MEMBER(sockaddr_storage __ss_family "sys/types.h;sys/socket.h" HAVE_BROKEN_SS_FAMILY)
+    	if(HAVE_BROKEN_SS_FAMILY)
+    		set(ss_family __ss_family)
+    	endif()
+    endif()
+endif()
 
-	int main(int argc, char* argv[])
-	{
-		va_copy(ap1, ap2);
-		return 0;
-	}
-	"
-	HAVE_VA_COPY )
+if(NOT HAVE_PRINTF AND NOT HAVE_SPRINTF AND NOT HAVE_FPRINTF AND
+   NOT HAVE_SNPRINTF AND NOT HAVE_VFPRINTF AND NOT HAVE_VSPRINTF AND
+   NOT HAVE_PRINTF AND NOT HAVE_SSCANF)
+  set(WITH_TRIO 1)
+else()
+  set(WITH_TRIO 0)
+endif()
 
-CHECK_C_SOURCE_COMPILES(
-	"
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	int main(int argc, char* argv[])
-	{
-		struct sockaddr_storage ss;
-		socket(AF_INET6, SOCK_STREAM, 0);
-		return 0;
-	}
-	"
-	SUPPORT_IP6 )
-
-CHECK_C_SOURCE_COMPILES(
-	"
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	int main(int argc, char* argv[])
-	{
-		struct sockaddr_storage ss;
-		ss.ss_family = 0;
-		return 0;
-	}
-	"
-	HAVE_SS_FAMILY )
-
-IF(NOT HAVE_SS_FAMILY)
-	CHECK_C_SOURCE_COMPILES(
-		"
-		#include <sys/types.h>
-		#include <sys/socket.h>
-		int main(int argc, char* argv[])
-		{
-			struct sockaddr_storage ss;
-			ss.__ss_family = 0;
-			return 0;
-		}
-		"
-		HAVE_BROKEN_SS_FAMILY )
-	IF(HAVE_BROKEN_SS_FAMILY)
-		SET(ss_family __ss_family)
-	ENDIF(HAVE_BROKEN_SS_FAMILY)
-ENDIF(NOT HAVE_SS_FAMILY)
-
-IF(NOT HAVE_PRINTF AND
-   NOT HAVE_SPRINTF AND
-   NOT HAVE_FPRINTF AND
-   NOT HAVE_SNPRINTF AND
-   NOT HAVE_VFPRINTF AND
-   NOT HAVE_VSPRINTF AND
-   NOT HAVE_PRINTF AND
-   NOT HAVE_SSCANF)
-  SET(WITH_TRIO 1)
-ELSE(NOT HAVE_PRINTF AND
-     NOT HAVE_SPRINTF AND
-     NOT HAVE_FPRINTF AND
-     NOT HAVE_SNPRINTF AND
-     NOT HAVE_VFPRINTF AND
-     NOT HAVE_VSPRINTF AND
-     NOT HAVE_PRINTF AND
-     NOT HAVE_SSCANF)
-  SET(WITH_TRIO 0)
-ENDIF(NOT HAVE_PRINTF AND
-      NOT HAVE_SPRINTF AND
-      NOT HAVE_FPRINTF AND
-      NOT HAVE_SNPRINTF AND
-      NOT HAVE_VFPRINTF AND
-      NOT HAVE_VSPRINTF AND
-      NOT HAVE_PRINTF AND
-      NOT HAVE_SSCANF)
-
-INCLUDE(FindThreads)
-IF( CMAKE_USE_PTHREADS_INIT )
-
-  SET( HAVE_LIBPTHREAD ${CMAKE_USE_PTHREADS_INIT} )
+find_package(Threads)
+if(CMAKE_USE_PTHREADS_INIT)
+  set(HAVE_LIBPTHREAD YES)
   ADD_DEFINITIONS( -D_REENTRANT )
-  SET( WITH_THREADS 1 )
-
-ELSE( CMAKE_USE_PTHREADS_INIT )
-
-  IF( CMAKE_USE_WIN32_THREADS_INIT )
-    #SET( HAVE_WIN32_THREADS ${CMAKE_USE_WIN32_THREADS_INIT} )
+  set(WITH_THREADS 1 )
+else()
+  if(CMAKE_USE_WIN32_THREADS_INIT)
     ADD_DEFINITIONS( -D_REENTRANT -DHAVE_WIN32_THREADS )
-    SET( WITH_THREADS 1 )
-  ELSE( CMAKE_USE_WIN32_THREADS_INIT )
-    SET( WITH_THREADS 0 )
-  ENDIF( CMAKE_USE_WIN32_THREADS_INIT )
+    set(WITH_THREADS 1 )
+  else()
+    set(WITH_THREADS 0 )
+  endif()
+endif()
 
-ENDIF( CMAKE_USE_PTHREADS_INIT )
-
-SET( WITH_TREE 1 )
-SET( WITH_OUTPUT 1 )
-SET( WITH_PUSH 1 )
-SET( WITH_READER 1 )
-SET( WITH_PATTERN 1 )
-SET( WITH_WRITER 1 )
-SET( WITH_SAX1 1 )
-SET( WITH_FTP 1 )
-SET( WITH_HTTP 1 )
-SET( WITH_VALID 1 )
-SET( WITH_HTML 1 )
-SET( WITH_LEGACY 0 )
-SET( WITH_CATALOG 1 )
-SET( WITH_DOCB 0 )
-SET( WITH_XPATH 0 )
-SET( WITH_XPTR 0 )
-SET( WITH_XINCLUDE 0 )
-SET( WITH_ICONV 0 )
-SET( WITH_ISO8859X 1 )
-SET( WITH_DEBUG 0 )
-SET( WITH_MEM_DEBUG 0 )
-SET( WITH_RUN_DEBUG 0 )
-SET( WITH_REGEXPS 1 )
-SET( WITH_SCHEMAS 1 )
-SET( WITH_MODULES 1 )
-SET( MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
-IF( ZLIB_FOUND )
-	SET( WITH_ZLIB 1 )
-ELSE( ZLIB_FOUND )
-	SET( WITH_ZLIB 0 )
-ENDIF( ZLIB_FOUND )
-SET( WITH_C14N ${WITH_XPATH} )
-SET( WITH_SCHEMATRON ${WITH_XPATH} )
+set(WITH_TREE 1 )
+set(WITH_OUTPUT 1 )
+set(WITH_PUSH 1 )
+set(WITH_READER 1 )
+set(WITH_PATTERN 1 )
+set(WITH_WRITER 1 )
+set(WITH_SAX1 1 )
+set(WITH_FTP 1 )
+set(WITH_HTTP 1 )
+set(WITH_VALID 1 )
+set(WITH_HTML 1 )
+set(WITH_LEGACY 0 )
+set(WITH_CATALOG 1 )
+set(WITH_DOCB 0 )
+set(WITH_XPATH 0 )
+set(WITH_XPTR 0 )
+set(WITH_XINCLUDE 0 )
+set(WITH_ICONV 0 )
+set(WITH_ISO8859X 1 )
+set(WITH_DEBUG 0 )
+set(WITH_MEM_DEBUG 0 )
+set(WITH_RUN_DEBUG 0 )
+set(WITH_REGEXPS 1 )
+set(WITH_SCHEMAS 1 )
+set(WITH_MODULES 1 )
+set(MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX})
+set(WITH_C14N ${WITH_XPATH} )
+set(WITH_SCHEMATRON ${WITH_XPATH} )
 
 # Don't need this already a #define to include win32config.h when on windows
-#IF(WIN32)
+#if(WIN32)
 #	CONFIGURE_FILE(
 #		${CMAKE_CURRENT_SOURCE_DIR}/include/win32config.h
 #		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h
 #		COPYONLY )
 #ELSE(WIN32)
-IF( NOT WIN32 )
+if(NOT WIN32 )
 	CONFIGURE_FILE(
 		${CMAKE_CURRENT_SOURCE_DIR}/xml2_config.h.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h )
-ENDIF( NOT WIN32 )
+endif(NOT WIN32 )
 
-CONFIGURE_FILE( 
+set(LIBXML_VERSION_NUMBER ${PROJECT_VERSION_MAJOR}0${PROJECT_VERSION_MINOR}0${PROJECT_VERSION_PATCH}0)
+set(LIBXML_VERSION_EXTRA OpenCMISS)
+configure_file( 
 	${CMAKE_CURRENT_SOURCE_DIR}/include/libxml/xmlversion.h.cmake
 	${CMAKE_CURRENT_BINARY_DIR}/include/libxml/xmlversion.h @ONLY )
-INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/include )
-INCLUDE_DIRECTORIES( include )
 
-SET( CMAKE_DEBUG_POSTFIX "d" )
-SET( CMAKE_MFC_FLAG 0 )
+set(CMAKE_DEBUG_POSTFIX "d" )
+set(CMAKE_MFC_FLAG 0 )
 
-add_library( ${LIBRARY_TARGET_NAME} ${LIBRARY_BUILD_TYPE} ${XML2_SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} )
-# Add the necessary flag to tell that XPATH is enabled
-target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC LIBXML_XPATH_ENABLED)
+add_library(xml2 ${XML2_SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} )
+target_include_directories(xml2 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include include)
+target_compile_definitions(xml2 PUBLIC LIBXML_XPATH_ENABLED)
 if (WIN32)
-    target_compile_definitions(${LIBRARY_TARGET_NAME} PUBLIC _WINDOWS)
+    target_compile_definitions(xml2 PUBLIC _WINDOWS)
 endif()
-if(HAVE_DLOPEN)
-    target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC ${DL_LIBRARY})
+if(MSVC)
+	target_compile_definitions(xml2 PRIVATE _CRT_SECURE_NO_WARNINGS WINVER=0x0600)
+	if(NOT BUILD_SHARED_LIBS)
+		target_compile_definitions(xml2 PUBLIC LIBXML_STATIC)
+	endif()
+endif()
+if(WITH_THREADS)
+    target_compile_definitions(xml2 PRIVATE _REENTRANT)
+    if(CMAKE_USE_WIN32_THREADS_INIT)
+        target_compile_definitions(xml2 PRIVATE HAVE_WIN32_THREADS)
+    endif()
 endif()
 
-IF( ZLIB_FOUND )
-	target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC zlib)
-	target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE HAVE_ZLIB_H)
-ENDIF()
+if(ZLIB_FOUND )
+	target_link_libraries(xml2 PUBLIC zlib)
+	target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
+endif()
+# We use dl functionality - other will need it too! (Its most likely libdl.so, so no symbols are pulled in)
+if (HAVE_DLOPEN)
+    target_link_libraries(xml2 PUBLIC dl)
+endif()
 
-INSTALL( TARGETS ${LIBRARY_TARGET_NAME}
+install(TARGETS xml2
     EXPORT libxml2-config
 	DESTINATION lib
 	INCLUDES DESTINATION include/libxml2 )
-INSTALL( FILES ${PUBLIC_HDRS}
+install(FILES ${PUBLIC_HDRS}
 	DESTINATION include/libxml2/libxml )
 install(EXPORT libxml2-config DESTINATION ${PACKAGE_CONFIG_DIR})   
 include(CMakePackageConfigHelpers)

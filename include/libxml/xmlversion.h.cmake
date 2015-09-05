@@ -29,7 +29,7 @@ XMLPUBFUN void XMLCALL xmlCheckVersion(int version);
  *
  * the version string like "1.2.3"
  */
-#define LIBXML_DOTTED_VERSION "@VERSION@"
+#define LIBXML_DOTTED_VERSION "@PROJECT_VERSION@"
 
 /**
  * LIBXML_VERSION:
