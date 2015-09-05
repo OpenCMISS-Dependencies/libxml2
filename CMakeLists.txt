@@ -328,6 +328,10 @@ target_include_directories(xml2 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include incl
 target_compile_definitions(xml2 PUBLIC LIBXML_XPATH_ENABLED)
 if (WIN32)
     target_compile_definitions(xml2 PUBLIC _WINDOWS)
+    # Fix for nanoftp/nanohttp
+    if (MINGW)
+        target_link_libraries(${LIBRARY_TARGET_NAME} PUBLIC ws2_32)
+    endif()
 endif()
 if(MSVC)
 	target_compile_definitions(xml2 PRIVATE _CRT_SECURE_NO_WARNINGS WINVER=0x0600)
