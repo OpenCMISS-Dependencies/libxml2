@@ -100,6 +100,23 @@ set(XML2_SRCS
 	xpath.c
 	xpointer.c )
 
+if(NOT HAVE_PRINTF AND NOT HAVE_SPRINTF AND NOT HAVE_FPRINTF AND
+   NOT HAVE_SNPRINTF AND NOT HAVE_VFPRINTF AND NOT HAVE_VSPRINTF AND
+   NOT HAVE_PRINTF AND NOT HAVE_SSCANF)
+  set(WITH_TRIO 1)
+else()
+  set(WITH_TRIO 0)
+endif()
+
+# FYI trio source 'trionan.c' is #included in xpath.c
+set(TRIO_SRCS
+	trio.c
+	triostr.c )
+
+if(WITH_TRIO)
+	set(XML2_SRCS ${XML2_SRCS} ${TRIO_SRCS} )
+endif()
+
 set(PRIVATE_HDRS
 	acconfig.h
 	elfgcchack.h
@@ -248,14 +265,6 @@ if (HAVE_SYS_SOCKET_H)
     		set(ss_family __ss_family)
     	endif()
     endif()
-endif()
-
-if(NOT HAVE_PRINTF AND NOT HAVE_SPRINTF AND NOT HAVE_FPRINTF AND
-   NOT HAVE_SNPRINTF AND NOT HAVE_VFPRINTF AND NOT HAVE_VSPRINTF AND
-   NOT HAVE_PRINTF AND NOT HAVE_SSCANF)
-  set(WITH_TRIO 1)
-else()
-  set(WITH_TRIO 0)
 endif()
 
 find_package(Threads)
