@@ -353,7 +353,7 @@ if(WITH_THREADS)
     endif()
 endif()
 
-if(ZLIB_FOUND )
+if(WITH_ZLIB)
 	target_link_libraries(xml2 PUBLIC zlib)
 	target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
 endif()
@@ -365,9 +365,9 @@ endif()
 install(TARGETS xml2
     EXPORT libxml2-config
 	DESTINATION lib
-	INCLUDES DESTINATION include/libxml2 )
+	INCLUDES DESTINATION include/libxml2)
 install(FILES ${PUBLIC_HDRS}
-	DESTINATION include/libxml2/libxml )
+	DESTINATION include/libxml2/libxml)
 install(EXPORT libxml2-config DESTINATION ${PACKAGE_CONFIG_DIR})   
 include(CMakePackageConfigHelpers)
 WRITE_BASIC_PACKAGE_VERSION_FILE(${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-version.cmake
