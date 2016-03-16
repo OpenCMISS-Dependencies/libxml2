@@ -100,23 +100,6 @@ set(XML2_SRCS
 	xpath.c
 	xpointer.c )
 
-if(NOT HAVE_PRINTF AND NOT HAVE_SPRINTF AND NOT HAVE_FPRINTF AND
-   NOT HAVE_SNPRINTF AND NOT HAVE_VFPRINTF AND NOT HAVE_VSPRINTF AND
-   NOT HAVE_PRINTF AND NOT HAVE_SSCANF)
-  set(WITH_TRIO 1)
-else()
-  set(WITH_TRIO 0)
-endif()
-
-# FYI trio source 'trionan.c' is #included in xpath.c
-set(TRIO_SRCS
-	trio.c
-	triostr.c )
-
-if(WITH_TRIO)
-	set(XML2_SRCS ${XML2_SRCS} ${TRIO_SRCS} )
-endif()
-
 set(PRIVATE_HDRS
 	acconfig.h
 	elfgcchack.h
@@ -189,11 +172,6 @@ if(WIN32)
 		include/wsockcompat.h)
 endif()
 
-# Best to use 'Header Files' and 'Source Files' because any ungrouped files will be placed there by default
-source_group( "Header Files\\libxml" FILES ${PUBLIC_HDRS} ) 
-source_group( "Header Files\\" FILES ${PRIVATE_HDRS} ) 
-source_group( "Source Files\\" FILES ${XML2_SRCS} ) 
-
 set(HAVE_PTHREAD_H ${CMAKE_HAVE_PTHREAD_H} )
 set(HAVE_UNISTD_H ${CMAKE_HAVE_UNISTD_H} )
 set(HAVE_LIMITS_H ${CMAKE_HAVE_LIMITS_H} )
@@ -224,8 +202,19 @@ set(CHECK_FUNCTIONS finite fpclass fprintf fp_class
     _stat getaddrinfo)
 foreach(funcname ${CHECK_FUNCTIONS})
     string(TOUPPER ${funcname} FUNCNAME_UPPER)
-    CHECK_FUNCTION_EXISTS(${funcname} HAVE_${FUNCNAME_UPPER} )    
+    CHECK_FUNCTION_EXISTS(${funcname} HAVE_${FUNCNAME_UPPER})    
 endforeach()
+
+if(NOT (HAVE_PRINTF OR HAVE_SPRINTF OR HAVE_FPRINTF OR
+   HAVE_SNPRINTF OR HAVE_VFPRINTF OR HAVE_VSPRINTF OR HAVE_SSCANF))
+  message(STATUS "Not all required print functions found. Building with TRIO.")
+  set(WITH_TRIO 1)
+  # FYI trio source 'trionan.c' is #included in xpath.c
+  list(APPEND XML2_SRCS trio.c triostr.c)
+else()
+  # Needed in CMake-configured files (xmlversion.h)
+  set(WITH_TRIO 0)  
+endif()
 
 include(CheckSymbolExists)
 if(StandardHeadersExist)
@@ -317,11 +306,16 @@ set(WITH_SCHEMATRON ${WITH_XPATH} )
 #		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h
 #		COPYONLY )
 #ELSE(WIN32)
-if(NOT WIN32 )
-	CONFIGURE_FILE(
+if(NOT WIN32)
+	configure_file(
 		${CMAKE_CURRENT_SOURCE_DIR}/xml2_config.h.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h )
-endif(NOT WIN32 )
+endif()
+
+# Best to use 'Header Files' and 'Source Files' because any ungrouped files will be placed there by default
+source_group( "Header Files\\libxml" FILES ${PUBLIC_HDRS} ) 
+source_group( "Header Files\\" FILES ${PRIVATE_HDRS} ) 
+source_group( "Source Files\\" FILES ${XML2_SRCS} ) 
 
 set(LIBXML_VERSION_NUMBER ${PROJECT_VERSION_MAJOR}0${PROJECT_VERSION_MINOR}0${PROJECT_VERSION_PATCH}0)
 set(LIBXML_VERSION_EXTRA OpenCMISS)
