@@ -39,7 +39,9 @@ cmake_minimum_required(VERSION 3.0)
 project(libxml2 LANGUAGES C CXX VERSION 2.7.6)
 
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
-option(PACKAGE_CONFIG_DIR "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)" "lib/cmake")
+if (NOT DEFINED PACKAGE_CONFIG_DIR)
+    set(PACKAGE_CONFIG_DIR "cmake" CACHE STRING "Common package config dir")
+endif()
 option(WITH_ZLIB "Build in zlib support" ON)
 
 if (WITH_ZLIB)
@@ -348,7 +350,7 @@ if(WITH_THREADS)
 endif()
 
 if(WITH_ZLIB)
-	target_link_libraries(xml2 PUBLIC zlib)
+        target_link_libraries(xml2 PUBLIC ${ZLIB_LIBRARIES})
 	target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
 endif()
 # We use dl functionality - other will need it too! (Its most likely libdl.so, so no symbols are pulled in)
@@ -362,7 +364,7 @@ install(TARGETS xml2
 	INCLUDES DESTINATION include/libxml2)
 install(FILES ${PUBLIC_HDRS}
 	DESTINATION include/libxml2/libxml)
-install(EXPORT libxml2-config DESTINATION ${PACKAGE_CONFIG_DIR})   
+install(EXPORT libxml2-config DESTINATION ${PACKAGE_CONFIG_DIR})
 include(CMakePackageConfigHelpers)
 WRITE_BASIC_PACKAGE_VERSION_FILE(${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-version.cmake
     COMPATIBILITY AnyNewerVersion)
