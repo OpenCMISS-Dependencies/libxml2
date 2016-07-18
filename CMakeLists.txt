@@ -350,6 +350,7 @@ if(WITH_THREADS)
 endif()
 
 if(WITH_ZLIB)
+    target_include_directories(xml2 PRIVATE ${ZLIB_INCLUDE_DIR})
         target_link_libraries(xml2 PUBLIC ${ZLIB_LIBRARIES})
 	target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
 endif()
