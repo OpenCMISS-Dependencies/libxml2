@@ -45,7 +45,7 @@ endif()
 option(WITH_ZLIB "Build in zlib support" ON)
 
 if (WITH_ZLIB)
-    find_package(ZLIB ${ZLIB_VERSION} REQUIRED)
+    find_package(ZLIB ${ZLIB_VERSION} CONFIG REQUIRED)
 endif()
 
 if(NOT BUILD_SHARED_LIBS)
