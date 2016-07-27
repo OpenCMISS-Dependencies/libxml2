@@ -45,7 +45,7 @@ endif()
 option(WITH_ZLIB "Build in zlib support" ON)
 
 if (WITH_ZLIB)
-    find_package(ZLIB ${ZLIB_VERSION} CONFIG REQUIRED)
+    find_package(ZLIB ${ZLIB_VERSION} REQUIRED)
 endif()
 
 if(NOT BUILD_SHARED_LIBS)
@@ -350,9 +350,7 @@ if(WITH_THREADS)
 endif()
 
 if(WITH_ZLIB)
-    #target_include_directories(xml2 PRIVATE ${ZLIB_INCLUDE_DIR})
     target_link_libraries(xml2 PUBLIC zlib)
-    #target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
 endif()
 # We use dl functionality - other will need it too! (Its most likely libdl.so, so no symbols are pulled in)
 if (HAVE_DLOPEN)
