@@ -39,7 +39,7 @@ cmake_minimum_required(VERSION 3.0)
 project(libxml2 LANGUAGES C CXX VERSION 2.7.6)
 
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
-option(PACKAGE_CONFIG_DIR "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)" "lib/cmake")
+set(PACKAGE_CONFIG_DIR "lib/cmake" CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
 option(WITH_ZLIB "Build in zlib support" ON)
 
 if (WITH_ZLIB)
