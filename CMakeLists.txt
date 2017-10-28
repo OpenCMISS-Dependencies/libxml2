@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
-project(libxml2 LANGUAGES C CXX VERSION 2.7.6)
+project(libxml2 LANGUAGES C CXX VERSION 2.9.6)
 
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
 set(PACKAGE_CONFIG_DIR "lib/cmake" CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
 option(WITH_ZLIB "Build in zlib support" ON)
+option(WITH_TRIO "Build with trio support" OFF)
 option(BUILD_SHARED_LIBS "Build shared library." ON)
 
 if (WITH_ZLIB)
@@ -20,59 +21,72 @@ else()
 endif()
 
 set(XML2_SRCS
-	c14n.c
-	catalog.c
-	chvalid.c
-	debugXML.c
-	dict.c
-	DOCBparser.c
-	encoding.c
-	entities.c
-	error.c
-	globals.c
-	hash.c
-	HTMLparser.c
-	HTMLtree.c	
-	legacy.c
-	list.c
-	nanoftp.c
-	nanohttp.c
-	parser.c
-	parserInternals.c
-	pattern.c
-	relaxng.c
-	SAX.c
-	SAX2.c
-	schematron.c
-	threads.c
-	tree.c
-	uri.c
-	valid.c
-	xinclude.c
-	xlink.c
-	xmlIO.c
-	xmlmemory.c
-	xmlmodule.c
-	xmlreader.c
-	xmlregexp.c
-	xmlsave.c
-	xmlschemas.c
-	xmlschemastypes.c
-	xmlstring.c
-	xmlunicode.c
-	xmlwriter.c
-	xpath.c
-	xpointer.c )
+    src/DOCBparser.c
+    src/HTMLparser.c
+    src/HTMLtree.c
+    src/SAX.c
+    src/SAX2.c
+    src/buf.c
+    src/c14n.c
+    src/catalog.c
+    src/chvalid.c
+    src/debugXML.c
+    src/dict.c
+    src/encoding.c
+    src/entities.c
+    src/error.c
+    src/globals.c
+    src/hash.c
+    src/legacy.c
+    src/list.c
+    src/nanoftp.c
+    src/nanohttp.c
+    src/parser.c
+    src/parserInternals.c
+    src/pattern.c
+    src/relaxng.c
+    src/schematron.c
+    src/threads.c
+    src/tree.c
+    src/uri.c
+    src/valid.c
+    src/xinclude.c
+    src/xlink.c
+    src/xmlIO.c
+    src/xmlmemory.c
+    src/xmlmodule.c
+    src/xmlreader.c
+    src/xmlregexp.c
+    src/xmlsave.c
+    src/xmlschemas.c
+    src/xmlschemastypes.c
+    src/xmlstring.c
+    src/xmlunicode.c
+    src/xmlwriter.c
+    src/xpath.c
+    src/xpointer.c
+    src/xzlib.c)
+
+if (WITH_TRIO)
+    list(APPEND XML2_SRCS
+        src/trio.c
+        src/trionan.c
+        src/triostr.c)
+endif ()
 
 set(PRIVATE_HDRS
-	acconfig.h
-	elfgcchack.h
-	libxml.h
-	trio.h
-	triodef.h
-	trionan.h
-	triop.h
-	triostr.h )
+    src/buf.h
+    src/elfgcchack.h
+    src/enc.h
+    src/libxml.h
+    src/save.h
+    src/timsort.h
+    src/trio.h
+    src/triodef.h
+    src/trionan.h
+    src/triop.h
+    src/triostr.h
+    src/xzlib.h)
 
 set(PUBLIC_HDRS
 	include/libxml/c14n.h
@@ -291,7 +305,8 @@ set(CMAKE_DEBUG_POSTFIX "d" )
 set(CMAKE_MFC_FLAG 0 )
 
 add_library(xml2 ${XML2_SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} )
-target_include_directories(xml2 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include include)
+target_include_directories(xml2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>)
+target_include_directories(xml2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_compile_definitions(xml2 PUBLIC LIBXML_XPATH_ENABLED)
 if (WIN32)
     target_compile_definitions(xml2 PUBLIC _WINDOWS)
@@ -312,15 +327,29 @@ if(WITH_THREADS)
 endif()
 
 if(WITH_ZLIB)
-	target_link_libraries(xml2 PUBLIC zlib)
-	target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
+    if (TARGET zlib)
+        target_link_libraries(xml2 PUBLIC zlib)
+    else ()
+        target_link_libraries(xml2 PUBLIC ${ZLIB_LIBRARIES})
+        target_include_directories(xml2 PUBLIC ${ZLIB_INCLUDE_DIR})
+    endif ()
+    target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
 endif()
+if (WITH_TRIO)
+    target_compile_definitions(xml2 PRIVATE WITH_TRIO)
+endif ()
+
 # We use dl functionality - other will need it too! (Its most likely libdl.so, so no symbols are pulled in)
 if (HAVE_DLOPEN)
     target_link_libraries(xml2 PUBLIC dl)
 endif()
 
-install(TARGETS xml2
+add_executable(xmllint src/xmllint.c)
+target_link_libraries(xmllint PRIVATE xml2)
+add_executable(xmlcatalog src/xmlcatalog.c)
+target_link_libraries(xmlcatalog PRIVATE xml2)
+
+install(TARGETS xml2 xmllint xmlcatalog
     EXPORT libxml2-config
 	DESTINATION lib
 	RUNTIME DESTINATION bin

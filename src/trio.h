@@ -29,7 +29,7 @@
  * HAVE_CONFIG_H as a compiler option themselves.
  */
 #if defined(TRIO_HAVE_CONFIG_H)
-# include "config.h"
+# include "xml2_config.h"
 #endif
 
 #include "triodef.h"
