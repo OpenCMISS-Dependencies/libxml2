@@ -3,12 +3,19 @@ project(libxml2 LANGUAGES C CXX VERSION 2.9.6)
 
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
 set(PACKAGE_CONFIG_DIR "lib/cmake" CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
-option(WITH_ZLIB "Build in zlib support" ON)
-option(WITH_TRIO "Build with trio support" OFF)
+option(ZLIB_WITH_ZLIB "Build in zlib support" ON)
+option(ZLIB_WITH_TRIO "Build with trio support" OFF)
 option(BUILD_SHARED_LIBS "Build shared library." ON)
 
+set(WITH_ZLIB ${ZLIB_WITH_ZLIB})
 if (WITH_ZLIB)
-    find_package(ZLIB ${ZLIB_VERSION} REQUIRED)
+    find_package(ZLIB ${ZLIB_VERSION})
+	if (NOT ZLIB_FOUND)
+		find_package(ZLIB ${ZLIB_VERSION} CONFIG)
+	endif ()
+	if (NOT ZLIB_FOUND)
+		message(FATAL_ERROR "zlib was NOT found!")
+	endif ()
 endif()
 
 if(NOT BUILD_SHARED_LIBS)
@@ -70,7 +77,7 @@ set(XML2_SRCS
 if (WITH_TRIO)
     list(APPEND XML2_SRCS
         src/trio.c
-        src/trionan.c
+        #src/trionan.c // # included in xpath.c
         src/triostr.c)
 endif ()
 
@@ -162,7 +169,7 @@ ctype dirent dl dlfcn errno fcntl float fp_class ieeefp
 inttypes inttypes malloc math memory nan ndir netdb netinet/in
 poll resolv signal stdarg stdint stdlib string strings
 sys/dir sys/mman sys/ndir sys/select sys/socket sys/stat
-sys/time sys/timeb time zlib)
+sys/time sys/timeb sys/types time zlib)
 foreach(incfile ${CHECK_INC_FILES})
     string(REPLACE "/" "_" VARPART ${incfile})
     string(TOUPPER ${VARPART} VARPART)
@@ -172,23 +179,41 @@ endforeach()
 include(CheckIncludeFiles)
 CHECK_INCLUDE_FILES("stdint.h;stddef.h;inttypes.h;stdlib.h;strings.h;string.h;float.h" StandardHeadersExist)
 
-include(CheckFunctionExists)
+include(CheckSymbolExists)
 set(CHECK_FUNCTIONS finite fpclass fprintf fp_class
     ftime gettimeofday isnand localtime printf signal
     snprintf sprintf sscanf stat strdup strerror
     strftime strndup vfprintf vsnprintf vsprintf 
-    _stat getaddrinfo)
+    _stat)
+set(HEADERS "stdio.h;stdint.h;stddef.h;inttypes.h;stdlib.h;string.h;float.h;time.h")
+if (HAVE_SYS_TYPES_H)
+	list(APPEND HEADERS "sys/types.h")
+endif ()
+if (HAVE_SYS_STAT_H)
+	list(APPEND HEADERS "sys/stat.h")
+endif ()
+if (HAVE_SYS_TIMEB_H)
+	list(APPEND HEADERS "sys/timeb.h")
+endif ()
 foreach(funcname ${CHECK_FUNCTIONS})
     string(TOUPPER ${funcname} FUNCNAME_UPPER)
-    CHECK_FUNCTION_EXISTS(${funcname} HAVE_${FUNCNAME_UPPER})    
+    CHECK_SYMBOL_EXISTS(${funcname} "${HEADERS}" HAVE_${FUNCNAME_UPPER})
 endforeach()
+
+set(ADDRINFO_HEADERS stdio.h)
+if (WIN32)
+	list(APPEND ADDRINFO_HEADERS winsock2.h ws2tcpip.h)
+	set(CMAKE_REQUIRED_LIBRARIES ws2_32)
+endif ()
+CHECK_SYMBOL_EXISTS(getaddrinfo "${ADDRINFO_HEADERS}" HAVE_GETADDRINFO)
+unset(CMAKE_REQUIRED_LIBRARIES)
 
 if(NOT (HAVE_PRINTF OR HAVE_SPRINTF OR HAVE_FPRINTF OR
    HAVE_SNPRINTF OR HAVE_VFPRINTF OR HAVE_VSPRINTF OR HAVE_SSCANF))
   message(STATUS "Not all required print functions found. Building with TRIO.")
   set(WITH_TRIO 1)
   # FYI trio source 'trionan.c' is #included in xpath.c
-  list(APPEND XML2_SRCS trio.c triostr.c)
+  list(APPEND XML2_SRCS src/trio.c src/triostr.c)
 else()
   # Needed in CMake-configured files (xmlversion.h)
   set(WITH_TRIO 0)  
@@ -277,18 +302,18 @@ set(MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX})
 set(WITH_C14N ${WITH_XPATH} )
 set(WITH_SCHEMATRON ${WITH_XPATH} )
 
-# Don't need this already a #define to include win32config.h when on windows
-#if(WIN32)
-#	CONFIGURE_FILE(
-#		${CMAKE_CURRENT_SOURCE_DIR}/include/win32config.h
-#		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h
-#		COPYONLY )
-#ELSE(WIN32)
-if(NOT WIN32)
+if (WIN32)
+	configure_file(
+		${CMAKE_CURRENT_SOURCE_DIR}/include/win32config.h
+		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h COPYONLY)
+	configure_file(
+		${CMAKE_CURRENT_SOURCE_DIR}/include/wsockcompat.h
+		${CMAKE_CURRENT_BINARY_DIR}/include/wsockcompat.h COPYONLY)
+else ()
 	configure_file(
 		${CMAKE_CURRENT_SOURCE_DIR}/xml2_config.h.cmake
-		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h )
-endif()
+		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h)
+endif ()
 
 # Best to use 'Header Files' and 'Source Files' because any ungrouped files will be placed there by default
 source_group( "Header Files\\libxml" FILES ${PUBLIC_HDRS} ) 
@@ -335,9 +360,6 @@ if(WITH_ZLIB)
     endif ()
     target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
 endif()
-if (WITH_TRIO)
-    target_compile_definitions(xml2 PRIVATE WITH_TRIO)
-endif ()
 
 # We use dl functionality - other will need it too! (Its most likely libdl.so, so no symbols are pulled in)
 if (HAVE_DLOPEN)
