@@ -333,6 +333,7 @@ add_library(xml2 ${XML2_SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS} )
 target_include_directories(xml2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>)
 target_include_directories(xml2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_compile_definitions(xml2 PUBLIC LIBXML_XPATH_ENABLED)
+
 if (WIN32)
     target_compile_definitions(xml2 PUBLIC _WINDOWS)
     # Fix for nanoftp/nanohttp
@@ -385,8 +386,18 @@ WRITE_BASIC_PACKAGE_VERSION_FILE(${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-vers
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake 
     "include(CMakeFindDependencyMacro)\r\n"
     	"set(${PROJECT_NAME}_IMPORT_PREFIX \${_IMPORT_PREFIX})\r\n")
+get_target_property(_xml2_type xml2 TYPE)
 if (WITH_ZLIB)
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "find_dependency(ZLIB ${ZLIB_VERSION})\r\n")
+	if (TARGET z)
+		get_target_property(_zlib_type z TYPE)
+	else ()
+		set(_zlib_type SHARED_LIBRARY)
+	endif ()
+    if (_zlib_type STREQUAL "STATIC_LIBRARY" AND _xml2_type STREQUAL "SHARED_LIBRARY")
+		file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "add_library(zlib INTERFACE IMPORTED)\r\n")
+	else ()
+		file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "find_dependency(ZLIB ${ZLIB_VERSION})\r\n")
+	endif ()
 endif()
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "set(_IMPORT_PREFIX \${${PROJECT_NAME}_IMPORT_PREFIX})")
 install(FILES 
