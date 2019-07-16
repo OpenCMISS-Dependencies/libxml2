@@ -349,7 +349,6 @@ if(WITH_THREADS)
 endif()
 
 if(WITH_ZLIB)
-	target_link_libraries(xml2 PUBLIC zlib)
 	target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
 endif()
 # We use dl functionality - other will need it too! (Its most likely libdl.so, so no symbols are pulled in)
