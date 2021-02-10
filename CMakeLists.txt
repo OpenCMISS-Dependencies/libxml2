@@ -8,7 +8,7 @@ option(BUILD_SHARED_LIBS "Build shared library." ON)
 if(WIN32)
 	set(_DEFAULT_PACKAGE_CONFIG_DIR ${PROJECT_NAME}/CMake)
 else()
-	set(_DEFAULT_PACKAGE_CONFIG_DIR lib/cmake/${PROJECT_NAME})
+	set(_DEFAULT_PACKAGE_CONFIG_DIR share/cmake/${PROJECT_NAME})
 endif()
 set(PACKAGE_CONFIG_DIR ${_DEFAULT_PACKAGE_CONFIG_DIR} CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
 
@@ -401,16 +401,28 @@ get_target_property(_xml2_type xml2 TYPE)
 if (WITH_ZLIB)
 	if (TARGET z)
 		get_target_property(_zlib_type z TYPE)
+        get_target_property(_is_zlib_found_by_config z IMPORTED_CONFIGURATIONS)
+    if (_is_zlib_found_by_config)
+        # Make sure that the ZLIB_DIR is absolute before it gets used in a configuration file for libxml2.
+        get_filename_component(_ABS_ZLIB_DIR "${ZLIB_DIR}" ABSOLUTE)
+    endif()
 	else ()
 		set(_zlib_type SHARED_LIBRARY)
 	endif ()
+    if (EXISTS "${_ABS_ZLIB_DIR}")
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "set(ZLIB_DIR \"${_ABS_ZLIB_DIR}\")\r\n")
+        # The find_dependency command doesn't appear to use CONFIG mode of find_package as a backup search mode.
+        # This means if we think we have found zlib for this library via configuration files then we force this 
+        # for the libxml2 find_dependency command.
+        set(_FIND_ZLIB_BY_CONFIG " CONFIG")
+    endif ()
     if (_zlib_type STREQUAL "STATIC_LIBRARY" AND _xml2_type STREQUAL "SHARED_LIBRARY")
 		file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "add_library(zlib INTERFACE IMPORTED)\r\n")
 	else ()
-		file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "set(ZLIB_FIND_SYSTEM ${ZLIB_FIND_SYSTEM})\r\nfind_dependency(ZLIB ${ZLIB_VERSION})\r\n")
+		file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "set(ZLIB_FIND_SYSTEM ${ZLIB_FIND_SYSTEM})\r\nfind_dependency(ZLIB ${ZLIB_VERSION}${_FIND_ZLIB_BY_CONFIG})\r\n")
 	endif ()
 endif()
-file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "set(_IMPORT_PREFIX \${${PROJECT_NAME}_IMPORT_PREFIX})")
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "set(_IMPORT_PREFIX \${${PROJECT_NAME}_IMPORT_PREFIX})\r\n")
 install(FILES 
     ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-version.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake
