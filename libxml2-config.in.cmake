@@ -1,0 +1,37 @@
+include(CMakeFindDependencyMacro)
+
+set(LIBXML2_SHARED @BUILD_SHARED_LIBS@)
+set(LIBXML2_WITH_ICONV @LIBXML2_WITH_ICONV@)
+set(LIBXML2_WITH_THREADS @LIBXML2_WITH_THREADS@)
+set(LIBXML2_WITH_ICU @LIBXML2_WITH_ICU@)
+set(LIBXML2_WITH_LZMA @LIBXML2_WITH_LZMA@)
+set(LIBXML2_WITH_ZLIB @LIBXML2_WITH_ZLIB@)
+
+if(NOT LIBXML2_SHARED)
+  if(LIBXML2_WITH_THREADS)
+    find_dependency(Threads)
+    list(APPEND LIBXML2_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+  endif()
+
+  if(LIBXML2_WITH_ICU)
+    find_dependency(ICU COMPONENTS data i18n uc)
+    list(APPEND LIBXML2_LIBRARIES    ${ICU_LIBRARIES})
+  endif()
+
+  if(LIBXML2_WITH_LZMA)
+    find_dependency(LibLZMA)
+    list(APPEND LIBXML2_LIBRARIES    ${LIBLZMA_LIBRARIES})
+  endif()
+
+  if(UNIX)
+    list(APPEND LIBXML2_LIBRARIES m)
+  endif()
+
+  if(WIN32)
+    list(APPEND LIBXML2_LIBRARIES ws2_32)
+  endif()
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/libxml2-exports.cmake")
+add_library(xml2 ALIAS LibXml2)
+
