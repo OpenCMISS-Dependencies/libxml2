@@ -33,5 +33,3 @@ if(NOT LIBXML2_SHARED)
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/libxml2-exports.cmake")
-add_library(xml2 ALIAS LibXml2)
-
