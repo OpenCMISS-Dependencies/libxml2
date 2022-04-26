@@ -48,129 +48,129 @@ if (WITH_ZLIB)
 endif()
 
 if(NOT BUILD_SHARED_LIBS)
-	set(LIBRARY_INSTALL_TYPE ARCHIVE )
+    set(LIBRARY_INSTALL_TYPE ARCHIVE )
 else()
-	set(LIBRARY_INSTALL_TYPE LIBRARY )
-	if(WIN32 )
-		set(LIBRARY_INSTALL_TYPE RUNTIME )
-	endif(WIN32 )
+    set(LIBRARY_INSTALL_TYPE LIBRARY )
+    if(WIN32 )
+        set(LIBRARY_INSTALL_TYPE RUNTIME )
+    endif(WIN32 )
 endif()
 
 set(XML2_SRCS
-	c14n.c
-	catalog.c
-	chvalid.c
-	debugXML.c
-	dict.c
-	DOCBparser.c
-	encoding.c
-	entities.c
-	error.c
-	globals.c
-	hash.c
-	HTMLparser.c
-	HTMLtree.c	
-	legacy.c
-	list.c
-	nanoftp.c
-	nanohttp.c
-	parser.c
-	parserInternals.c
-	pattern.c
-	relaxng.c
-	SAX.c
-	SAX2.c
-	schematron.c
-	threads.c
-	tree.c
-	uri.c
-	valid.c
-	xinclude.c
-	xlink.c
-	xmlIO.c
-	xmlmemory.c
-	xmlmodule.c
-	xmlreader.c
-	xmlregexp.c
-	xmlsave.c
-	xmlschemas.c
-	xmlschemastypes.c
-	xmlstring.c
-	xmlunicode.c
-	xmlwriter.c
-	xpath.c
-	xpointer.c )
+    c14n.c
+    catalog.c
+    chvalid.c
+    debugXML.c
+    dict.c
+    DOCBparser.c
+    encoding.c
+    entities.c
+    error.c
+    globals.c
+    hash.c
+    HTMLparser.c
+    HTMLtree.c    
+    legacy.c
+    list.c
+    nanoftp.c
+    nanohttp.c
+    parser.c
+    parserInternals.c
+    pattern.c
+    relaxng.c
+    SAX.c
+    SAX2.c
+    schematron.c
+    threads.c
+    tree.c
+    uri.c
+    valid.c
+    xinclude.c
+    xlink.c
+    xmlIO.c
+    xmlmemory.c
+    xmlmodule.c
+    xmlreader.c
+    xmlregexp.c
+    xmlsave.c
+    xmlschemas.c
+    xmlschemastypes.c
+    xmlstring.c
+    xmlunicode.c
+    xmlwriter.c
+    xpath.c
+    xpointer.c )
 
 set(PRIVATE_HDRS
-	acconfig.h
-	elfgcchack.h
-	libxml.h
-	trio.h
-	triodef.h
-	trionan.h
-	triop.h
-	triostr.h )
+    acconfig.h
+    elfgcchack.h
+    libxml.h
+    trio.h
+    triodef.h
+    trionan.h
+    triop.h
+    triostr.h )
 
 set(PUBLIC_HDRS
-	include/libxml/c14n.h
-	include/libxml/catalog.h
-	include/libxml/chvalid.h
-	include/libxml/debugXML.h
-	include/libxml/dict.h
-	include/libxml/DOCBparser.h
-	include/libxml/encoding.h
-	include/libxml/entities.h
-	include/libxml/globals.h
-	include/libxml/hash.h
-	include/libxml/HTMLparser.h
-	include/libxml/HTMLtree.h
-	include/libxml/list.h
-	include/libxml/nanoftp.h
-	include/libxml/nanohttp.h
-	include/libxml/parser.h
-	include/libxml/parserInternals.h
-	include/libxml/pattern.h
-	include/libxml/relaxng.h
-	include/libxml/SAX.h
-	include/libxml/SAX2.h
-	include/libxml/schemasInternals.h
-	include/libxml/schematron.h
-	include/libxml/threads.h
-	include/libxml/tree.h
-	include/libxml/uri.h
-	include/libxml/valid.h
-	include/libxml/xinclude.h
-	include/libxml/xlink.h
-	include/libxml/xmlautomata.h
-	include/libxml/xmlerror.h
-	include/libxml/xmlexports.h
-	include/libxml/xmlIO.h
-	include/libxml/xmlmemory.h
-	include/libxml/xmlmodule.h
-	include/libxml/xmlreader.h
-	include/libxml/xmlregexp.h
-	include/libxml/xmlsave.h
-	include/libxml/xmlschemas.h
-	include/libxml/xmlschemastypes.h
-	include/libxml/xmlstring.h
-	include/libxml/xmlunicode.h
-	include/libxml/xmlwriter.h
-	include/libxml/xpath.h
-	include/libxml/xpathInternals.h
-	include/libxml/xpointer.h )
+    include/libxml/c14n.h
+    include/libxml/catalog.h
+    include/libxml/chvalid.h
+    include/libxml/debugXML.h
+    include/libxml/dict.h
+    include/libxml/DOCBparser.h
+    include/libxml/encoding.h
+    include/libxml/entities.h
+    include/libxml/globals.h
+    include/libxml/hash.h
+    include/libxml/HTMLparser.h
+    include/libxml/HTMLtree.h
+    include/libxml/list.h
+    include/libxml/nanoftp.h
+    include/libxml/nanohttp.h
+    include/libxml/parser.h
+    include/libxml/parserInternals.h
+    include/libxml/pattern.h
+    include/libxml/relaxng.h
+    include/libxml/SAX.h
+    include/libxml/SAX2.h
+    include/libxml/schemasInternals.h
+    include/libxml/schematron.h
+    include/libxml/threads.h
+    include/libxml/tree.h
+    include/libxml/uri.h
+    include/libxml/valid.h
+    include/libxml/xinclude.h
+    include/libxml/xlink.h
+    include/libxml/xmlautomata.h
+    include/libxml/xmlerror.h
+    include/libxml/xmlexports.h
+    include/libxml/xmlIO.h
+    include/libxml/xmlmemory.h
+    include/libxml/xmlmodule.h
+    include/libxml/xmlreader.h
+    include/libxml/xmlregexp.h
+    include/libxml/xmlsave.h
+    include/libxml/xmlschemas.h
+    include/libxml/xmlschemastypes.h
+    include/libxml/xmlstring.h
+    include/libxml/xmlunicode.h
+    include/libxml/xmlwriter.h
+    include/libxml/xpath.h
+    include/libxml/xpathInternals.h
+    include/libxml/xpointer.h )
 set(PUBLIC_HDRS ${PUBLIC_HDRS} ${CMAKE_CURRENT_BINARY_DIR}/include/libxml/xmlversion.h )
 
 if(MACOSX )
-	list(APPEND PRIVATE_HDRS
-		macos/src/config-mac.h
-		macos/src/xmltestprefix.h
-		macos/src/xmltestprefix2.h )
+    list(APPEND PRIVATE_HDRS
+        macos/src/config-mac.h
+        macos/src/xmltestprefix.h
+        macos/src/xmltestprefix2.h )
 endif()
 
 if(WIN32)
-	list(APPEND PRIVATE_HDRS
-		include/win32config.h
-		include/wsockcompat.h)
+    list(APPEND PRIVATE_HDRS
+        include/win32config.h
+        include/wsockcompat.h)
 endif()
 
 set(HAVE_PTHREAD_H ${CMAKE_HAVE_PTHREAD_H} )
@@ -219,10 +219,10 @@ endif()
 
 include(CheckSymbolExists)
 if(StandardHeadersExist)
-	CHECK_SYMBOL_EXISTS( memchr string.h memchrExists )
-	if(memchrExists)
-		CHECK_SYMBOL_EXISTS(free stdlib.h STDC_HEADERS)
-	endif()
+    CHECK_SYMBOL_EXISTS( memchr string.h memchrExists )
+    if(memchrExists)
+        CHECK_SYMBOL_EXISTS(free stdlib.h STDC_HEADERS)
+    endif()
 endif()
 CHECK_SYMBOL_EXISTS(DIR "sys/dir.h" HAVE_SYS_DIR_H) 
 CHECK_SYMBOL_EXISTS(isinf math.h HAVE_ISINF)
@@ -251,9 +251,9 @@ if (HAVE_SYS_SOCKET_H)
     CHECK_STRUCT_HAS_MEMBER(sockaddr_storage ss_family "sys/types.h;sys/socket.h" HAVE_SS_FAMILY)
     if(NOT HAVE_SS_FAMILY)
         CHECK_STRUCT_HAS_MEMBER(sockaddr_storage __ss_family "sys/types.h;sys/socket.h" HAVE_BROKEN_SS_FAMILY)
-    	if(HAVE_BROKEN_SS_FAMILY)
-    		set(ss_family __ss_family)
-    	endif()
+        if(HAVE_BROKEN_SS_FAMILY)
+            set(ss_family __ss_family)
+        endif()
     endif()
 endif()
 
@@ -302,15 +302,15 @@ set(WITH_SCHEMATRON ${WITH_XPATH} )
 
 # Don't need this already a #define to include win32config.h when on windows
 #if(WIN32)
-#	CONFIGURE_FILE(
-#		${CMAKE_CURRENT_SOURCE_DIR}/include/win32config.h
-#		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h
-#		COPYONLY )
+#    CONFIGURE_FILE(
+#        ${CMAKE_CURRENT_SOURCE_DIR}/include/win32config.h
+#        ${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h
+#        COPYONLY )
 #ELSE(WIN32)
 if(NOT WIN32)
-	configure_file(
-		${CMAKE_CURRENT_SOURCE_DIR}/xml2_config.h.cmake
-		${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h )
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/xml2_config.h.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/include/xml2_config.h )
 endif()
 
 # Best to use 'Header Files' and 'Source Files' because any ungrouped files will be placed there by default
@@ -321,8 +321,8 @@ source_group( "Source Files\\" FILES ${XML2_SRCS} )
 set(LIBXML_VERSION_NUMBER ${PROJECT_VERSION_MAJOR}0${PROJECT_VERSION_MINOR}0${PROJECT_VERSION_PATCH}0)
 set(LIBXML_VERSION_EXTRA OpenCMISS)
 configure_file( 
-	${CMAKE_CURRENT_SOURCE_DIR}/include/libxml/xmlversion.h.cmake
-	${CMAKE_CURRENT_BINARY_DIR}/include/libxml/xmlversion.h @ONLY )
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/libxml/xmlversion.h.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/include/libxml/xmlversion.h @ONLY )
 
 set(CMAKE_DEBUG_POSTFIX "d" )
 set(CMAKE_MFC_FLAG 0 )
@@ -335,11 +335,11 @@ if (WIN32)
     # Fix for nanoftp/nanohttp
     target_link_libraries(xml2 PUBLIC ws2_32)
     if(MSVC)
-    	target_compile_definitions(xml2 PRIVATE _CRT_SECURE_NO_WARNINGS WINVER=0x0600)
+        target_compile_definitions(xml2 PRIVATE _CRT_SECURE_NO_WARNINGS WINVER=0x0600)
     endif()
 endif()
 if(NOT BUILD_SHARED_LIBS)
-	target_compile_definitions(xml2 PUBLIC LIBXML_STATIC)
+    target_compile_definitions(xml2 PUBLIC LIBXML_STATIC)
 endif()
 if(WITH_THREADS)
     target_compile_definitions(xml2 PRIVATE _REENTRANT)
@@ -349,8 +349,8 @@ if(WITH_THREADS)
 endif()
 
 if(WITH_ZLIB)
-	target_link_libraries(xml2 PUBLIC zlib)
-	target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
+    target_link_libraries(xml2 PUBLIC zlib)
+    target_compile_definitions(xml2 PRIVATE HAVE_ZLIB_H)
 endif()
 # We use dl functionality - other will need it too! (Its most likely libdl.so, so no symbols are pulled in)
 if (HAVE_DLOPEN)
@@ -359,18 +359,18 @@ endif()
 
 install(TARGETS xml2
     EXPORT libxml2-config
-	DESTINATION lib
-	RUNTIME DESTINATION bin
-	INCLUDES DESTINATION include/libxml2)
+    DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include/libxml2)
 install(FILES ${PUBLIC_HDRS}
-	DESTINATION include/libxml2/libxml)
+    DESTINATION include/libxml2/libxml)
 install(EXPORT libxml2-config DESTINATION ${PACKAGE_CONFIG_DIR})   
 include(CMakePackageConfigHelpers)
 WRITE_BASIC_PACKAGE_VERSION_FILE(${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-version.cmake
     COMPATIBILITY AnyNewerVersion)
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake 
     "include(CMakeFindDependencyMacro)\r\n"
-    	"set(${PROJECT_NAME}_IMPORT_PREFIX \${_IMPORT_PREFIX})\r\n")
+        "set(${PROJECT_NAME}_IMPORT_PREFIX \${_IMPORT_PREFIX})\r\n")
 if (WITH_ZLIB)
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/libxml2-config-dependencies.cmake "set(ZLIB_FIND_SYSTEM ${ZLIB_FIND_SYSTEM})\r\nfind_dependency(ZLIB ${ZLIB_VERSION})\r\n")
 endif()
